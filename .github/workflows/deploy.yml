@@ -1,0 +1,71 @@
+# Source: https://www.pacifis.org/posts/set-up-a-sveltekit-website-in-github-pages/
+
+# The name of the workflow displayed under your repository's "Actions" tab.
+name: Deploy to Github pages
+
+# To automatically trigger a workflow, use on to define which events can cause the workflow to run
+on:
+  # Trigger the workflow every time you push to the `main` branch
+  # Using a different branch name? Replace `main` with your branch’s name
+  push:
+    branches: [main]
+
+  # Allows you to run this workflow manually from the Actions tab on GitHub.
+  workflow_dispatch:
+
+# Allow this job to read the repository and create a page deployment
+permissions:
+  contents: read
+  pages: write
+  # Only needed when working with external cloud providers
+  # id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: 'npm'
+      
+      - name: Configure Github pages
+        uses: actions/configure-pages@v6
+        # needed ?:
+        # with:
+        #   static_site_generator: sveltekit
+        
+      # Installs all Node.js dependencies as specified in 'package.json'
+      - name: Install dependencies
+        run: npm ci # Install exact versions from 'package-lock.json' (faster and more reliable)
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          # this should match the `pages` option in your adapter-static options
+          path: build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5
