@@ -12,7 +12,9 @@
 
     onMount(async () => {
         // Source: https://www.reddit.com/r/sveltejs/comments/ya24m6/python_pyodide_module_works_with_sveltekit/
-        pyodide = await loadPyodide();
+        pyodide = await loadPyodide({
+            indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.1/full/",
+        });
         console.log(pyodide.runPython(`
             import sys
             sys.version
