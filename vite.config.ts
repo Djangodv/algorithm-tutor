@@ -4,6 +4,11 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+
+	// Fix: "The dependency might be incompatible with the dep optimizer. Try adding it to `optimizeDeps.exclude`"
+	optimizeDeps: {
+		exclude: ['pyodide']
+	},
 	plugins: [
 		sveltekit({
 			compilerOptions: {
