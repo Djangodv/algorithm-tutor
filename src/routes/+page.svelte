@@ -1,10 +1,11 @@
 <script lang='ts'>
 
-    import { loadPyodide } from 'pyodide';
+    // @ts-ignore
+    import { loadPyodide } from 'https://cdn.jsdelivr.net/pyodide/v314.0.7/full/pyodide.mjs';
 	import { onMount } from 'svelte';
-    import { type PyodideInterface } from 'pyodide';
+    // import { type PyodideInterface } from 'https://cdn.jsdelivr.net/pyodide/v314.0.7/full/';
 
-    let pyodide: PyodideInterface;
+    let pyodide: any;
 
     // Source: https://svelte.dev/docs/svelte/lifecycle-hooks
     // The 'onMount' function schedules a callback to run as soon as the component has been mounted to the DOM.

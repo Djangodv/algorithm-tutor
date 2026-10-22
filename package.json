@@ -35,8 +35,5 @@
 	"imports": {
 		"#lib": "./src/lib/index.js",
 		"#lib/*": "./src/lib/*"
-	},
-	"dependencies": {
-		"pyodide": "^314.0.7"
 	}
 }
