@@ -2,6 +2,30 @@
 import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
+import { viteStaticCopy } from "vite-plugin-static-copy";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
+
+const PYODIDE_EXCLUDE = [
+  "!**/*.{md,html}",
+  "!**/*.d.ts",
+  "!**/*.whl",
+  "!**/pyodide/node_modules",
+];
+
+export function viteStaticCopyPyodide() {
+  const pyodideDir = dirname(fileURLToPath(import.meta.resolve("pyodide")));
+  return viteStaticCopy({
+    targets: [
+      {
+        src: [join(pyodideDir, "*").replace(/\\/g, "/")].concat(
+          PYODIDE_EXCLUDE
+        ),
+        dest: "assets",
+      },
+    ],
+  });
+}
 
 export default defineConfig({
 
@@ -10,6 +34,7 @@ export default defineConfig({
 		exclude: ['pyodide']
 	},
 	plugins: [
+		viteStaticCopyPyodide(),
 		sveltekit({
 			compilerOptions: {
 				// Enable use of 'await' keyword inside top level of your component's <script>

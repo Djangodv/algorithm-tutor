@@ -1,10 +1,10 @@
 <script lang='ts'>
 
-    import { loadPyodide, version as pyodideVersion} from 'pyodide';
+    import { loadPyodide } from 'pyodide';
 	import { onMount } from 'svelte';
-    // import { type PyodideInterface } from 'pyodide';
+    import { type PyodideInterface } from 'pyodide';
 
-    let pyodide: any;
+    let pyodide: PyodideInterface;
 
     // Source: https://svelte.dev/docs/svelte/lifecycle-hooks
     // The 'onMount' function schedules a callback to run as soon as the component has been mounted to the DOM.
@@ -12,9 +12,7 @@
 
     onMount(async () => {
         // Source: https://www.reddit.com/r/sveltejs/comments/ya24m6/python_pyodide_module_works_with_sveltekit/
-        const pyodide = await loadPyodide({
-            indexURL: `https://cdn.jsdelivr.net/pyodide/v${pyodideVersion}/full/`,
-        });
+        pyodide = await loadPyodide();
         console.log(pyodide.runPython(`
             import sys
             sys.version
