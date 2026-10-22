@@ -34,7 +34,7 @@ export default defineConfig({
 		exclude: ['pyodide']
 	},
 	plugins: [
-		viteStaticCopyPyodide(),
+		// viteStaticCopyPyodide(),
 		sveltekit({
 			compilerOptions: {
 				// Enable use of 'await' keyword inside top level of your component's <script>
