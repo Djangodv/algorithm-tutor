@@ -1,9 +1,8 @@
 <script lang='ts'>
 
-    // @ts-ignore
-    import { loadPyodide } from 'https://cdn.jsdelivr.net/pyodide/v314.0.7/full/pyodide.mjs';
+    import { loadPyodide, version as pyodideVersion} from 'pyodide';
 	import { onMount } from 'svelte';
-    // import { type PyodideInterface } from 'https://cdn.jsdelivr.net/pyodide/v314.0.7/full/';
+    // import { type PyodideInterface } from 'pyodide';
 
     let pyodide: any;
 
@@ -13,7 +12,9 @@
 
     onMount(async () => {
         // Source: https://www.reddit.com/r/sveltejs/comments/ya24m6/python_pyodide_module_works_with_sveltekit/
-        pyodide = await loadPyodide();
+        const pyodide = await loadPyodide({
+            indexURL: `https://cdn.jsdelivr.net/pyodide/v${pyodideVersion}/full/`,
+        });
         console.log(pyodide.runPython(`
             import sys
             sys.version
