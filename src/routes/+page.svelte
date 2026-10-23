@@ -4,6 +4,10 @@
 	import { onMount } from 'svelte';
     import { type PyodideInterface } from 'pyodide';
 
+    // Import seperate Python debugger components
+    import ast_visitor_code from '../debugger/astVisitor.py?raw';
+    // console.log(ast_visitor_code); // TEST
+
     let pyodide: PyodideInterface;
 
     // Source: https://svelte.dev/docs/svelte/lifecycle-hooks
@@ -22,16 +26,49 @@
         // Source: https://pyodide.org/en/stable/usage/streams.html
         pyodide.setStdout({
             batched: (str: string) => {
-                output = str + "\n";
+                // console.log(str);
+                output += str + "\n";
             }
         });
+        await loadPythonComponents();
     })
+
+    async function loadPythonComponents() {
+        pyodide.FS.writeFile('/home/pyodide/astVisitor.py', ast_visitor_code);
+    }
+
+    async function runPythonAnalysis(code: string) {
+
+        const injectedCode: string = `
+import ast
+
+from astVisitor import MyVisitor
+
+visitor = MyVisitor()
+
+code = """
+${code}
+"""
+
+tree = ast.parse(code)
+
+# print(ast.dump(tree, indent=2))
+
+visitor.visit(tree)
+
+print(visitor.target_array, visitor.index_variable)
+        `
+
+        return await pyodide.runPythonAsync(injectedCode)
+
+    }
 
     let input_code = $state('');
     let output = $state('');
 
     async function runCode() {
-        await pyodide.runPythonAsync(input_code);
+        // await pyodide.runPythonAsync(input_code);
+        await runPythonAnalysis(input_code);
         console.log(output)
     };
 
@@ -41,5 +78,6 @@
 <p>Visit <a href="https://github.com/Djangodv/algorithm-tutor">github.com/Djangodv/algorithm-tutor</a> for more information about the project.</p>
 
 <!-- Source: https://svelte.dev/tutorial/svelte/text-inputs -->
-<input bind:value={input_code} placeholder="Input code...">
+<!-- <input bind:value={input_code} placeholder="Input code..."> -->
+<textarea bind:value={input_code} style="height: 100px; width: 500px" placeholder="Input code..."></textarea>
 <button onclick={runCode}>Run</button>
