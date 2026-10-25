@@ -33,3 +33,9 @@ build/
 # Logs
 npm-debug.log*
 yarn-debug.log*
+
+# ToDo
+todo.md
+
+# Python Cache
+__pycache__
