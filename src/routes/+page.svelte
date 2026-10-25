@@ -6,7 +6,9 @@
 
     // Import seperate Python debugger components
     import ast_visitor_code from '../debugger/astVisitor.py?raw';
-    // console.log(ast_visitor_code); // TEST
+    import ast_transformer_code from '../debugger/astTransformer.py?raw';
+    import tracer_code from '../debugger/tracer.py?raw';
+    // console.log(tracer_code); // TEST
 
     let pyodide: PyodideInterface;
 
@@ -35,28 +37,46 @@
 
     async function loadPythonComponents() {
         pyodide.FS.writeFile('/home/pyodide/astVisitor.py', ast_visitor_code);
+        pyodide.FS.writeFile('/home/pyodide/astTransformer.py', ast_transformer_code);
+        pyodide.FS.writeFile('/home/pyodide/tracer.py', tracer_code);
     }
 
     async function runPythonAnalysis(code: string) {
 
         const injectedCode: string = `
 import ast
+import sys
 
+from astTransformer import MyTransformer
 from astVisitor import MyVisitor
+from tracer import DebugTracer
 
-visitor = MyVisitor()
-
-code = """
-${code}
-"""
+code = """${code}"""
 
 tree = ast.parse(code)
 
-# print(ast.dump(tree, indent=2))
+transformer = MyTransformer()
+modified_tree = ast.fix_missing_locations(transformer.visit(tree))
 
-visitor.visit(tree)
+visitor = MyVisitor()
+visitor.visit(modified_tree)
 
-print(visitor.target_array, visitor.index_variable)
+# Initialization of DebugTracer class can only be done when visitor.visit has been ran
+tracer = DebugTracer(visitor.target_array, visitor.shadow_idx)
+
+code_obj = compile(modified_tree, filename='<transformed>', mode='exec')
+
+# Only run the tracer on the user code (nothing else)
+sys.settrace(tracer.myTracer)
+
+# Pass a sandbox environment to the exec() function with access to only the builtin methods (w. __builtins__), i.e. print(), len(), etc.
+sandbox_env = {"__builtins__": __builtins__}
+exec(code_obj, sandbox_env) 
+
+sys.settrace(None)
+
+for i in tracer.execution_history:
+    print(i)
         `
 
         return await pyodide.runPythonAsync(injectedCode)
